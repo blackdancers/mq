@@ -40,7 +40,15 @@
     </bean>
     <!-- 3、配置消费者-->
     <!-- 生产者往指定目的地Destination发送消息后，接下来就是消费者对指定目的地的消息进行消费-->
-    
+
+    <!-- 消息监听器 -->
+    <bean class="com.wk.spring.mq.listener.ConsumerMessageListener" id="consumerMessageListener"/>
+    <!-- 消息监听容器-->
+    <bean class="org.springframework.jms.listener.DefaultMessageListenerContainer" id="listenerContainer">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="destination" ref="queueDestination"/>
+        <property name="messageListener" ref="consumerMessageListener"/>
+    </bean>
 
 
 
