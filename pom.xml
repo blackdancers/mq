@@ -9,6 +9,8 @@
   <modules>
   	<module>activemq-demo</module>
   	<module>activemq-spring</module>
+	  <module>../activemq-spring-listener</module>
+	  <module>../activemq-message-adapter</module>
   </modules>
   
   <properties>
