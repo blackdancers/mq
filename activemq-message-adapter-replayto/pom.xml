@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>mq-parent</groupId>
-    <artifactId>activemq-message-adapter</artifactId>
+    <artifactId>activemq-message-adapter-replayto</artifactId>
 
 
 </project>

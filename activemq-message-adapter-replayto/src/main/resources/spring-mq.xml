@@ -29,6 +29,7 @@
     <!--2、生产者-->
 
     <!--3、监听器-->
+    <!-- a-->
     <!-- 消息监听适配器 -->
     <bean class="org.springframework.jms.listener.adapter.MessageListenerAdapter" id="messageListenerAdapter">
         <constructor-arg>
@@ -42,8 +43,6 @@
     <bean class="org.apache.activemq.command.ActiveMQQueue" id="adapterQueue">
         <constructor-arg value="adpaterQueue"/>
     </bean>
-
-    <!--4、监听器容器-->
     <!-- 消息监听适配器对应的监听容器 -->
     <bean class="org.springframework.jms.listener.DefaultMessageListenerContainer" id="messageListenerContainer">
         <property name="connectionFactory" ref="connectionFactory"/>
@@ -52,5 +51,19 @@
         <property name="messageListener" ref="messageListenerAdapter"/>
     </bean>
 
+    <!-- b-->
+    <!-- responseQueue对应的监听器 -->
+    <bean class="com.wk.spring.mq.listener.ResponseQueueListener" id="responseQueueListener"/>
+
+    <!-- 用于测试消息回复的-->
+    <bean class="org.apache.activemq.command.ActiveMQQueue" id="responseQueue">
+        <constructor-arg value="responseQueue"/>
+    </bean>
+    <!-- responseQueue对应的监听容器 -->
+    <bean class="org.springframework.jms.listener.DefaultMessageListenerContainer" id="responseMessageListenerContainer">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="destination" ref="responseQueue"/>
+        <property name="messageListener" ref="responseQueueListener"/>
+    </bean>
 
 </beans>

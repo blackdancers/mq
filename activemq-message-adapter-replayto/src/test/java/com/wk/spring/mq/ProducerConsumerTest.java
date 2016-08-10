@@ -26,5 +26,4 @@ public class ProducerConsumerTest {
     public void testSend(){
         producerService.sendMessage(destination,"测试MessageListenerAdapter");
     }
-
 }
