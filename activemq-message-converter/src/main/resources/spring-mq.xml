@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--1.配置-->
+    <!-- 真正可以产生Connection的ConnectionFactory，由对应的JMS服务厂商提供-->
+    <bean class="org.apache.activemq.ActiveMQConnectionFactory" id="targetConnectionFactory">
+        <property name="brokerURL" value="${mq.brokerURL}"/>
+        <property name="userName" value="${mq.userName}"/>
+        <property name="password" value="${mq.password}"/>
+        <!--序列化时 添加受信任的包-->
+        <property name="trustedPackages">
+            <list>
+                <value>com.wk.spring.mq.message</value>
+                <value>java.util</value>
+            </list>
+        </property>
+        <!-- 或者全部信任-->
+        <!--<property name="trustAllPackages" value="true"/>-->
+
+    </bean>
+    <!-- ActiveMQ为我们提供了一个PooledConnectionFactory，通过往里面注入一个ActiveMQConnectionFactory可以用来将Connection,Session和MessageProducer池化，这样可以大大的减少我们的资源消耗。-->
+    <bean class="org.apache.activemq.jms.pool.PooledConnectionFactory" id="pooledConnectionFactory">
+        <property name="connectionFactory" ref="targetConnectionFactory"/>
+        <property name="maxConnections" value="${mq.pool.maxConnections}"/>
+    </bean>
+    <!--Spring提供的ConnectionFactory只是Spring用于管理ConnectionFactory-->
+    <bean class="org.springframework.jms.connection.SingleConnectionFactory" id="connectionFactory">
+        <!-- 目标ConnectionFactory对应真实的可以产生JMS Connection的ConnectionFactory-->
+        <property name="targetConnectionFactory" ref="pooledConnectionFactory"/>
+    </bean>
+    <!-- Spring提供的JMS工具类，它可以进行消息发送、接收等-->
+    <bean class="org.springframework.jms.core.JmsTemplate" id="jmsTemplate">
+        <!-- 这个connectionFactory对应的Spring提供的那个ConnectionFactory对象-->
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <!-- 消息转换器 -->
+        <property name="messageConverter" ref="emailMessageConverter"/>
+    </bean>
+    <!-- 消息类型转换器 -->
+    <bean class="com.wk.spring.mq.message.EmailMessageConverter" id="emailMessageConverter"/>
+
+    <!-- 用于测试消息类型转换器的队列目的地 -->
+    <bean class="org.apache.activemq.command.ActiveMQQueue" id="messageConverterQueue">
+        <constructor-arg value="messageConverterQueue"/>
+    </bean>
+
+    <bean class="com.wk.spring.mq.listener.MessageConverterListener" id="converterListener">
+        <property name="messageConverter" ref="emailMessageConverter"/>
+    </bean>
+
+    <!--<bean class="org.springframework.jms.listener.DefaultMessageListenerContainer" id="messageListenerContainer">-->
+        <!--<property name="connectionFactory" ref="connectionFactory"/>-->
+        <!--<property name="destination" ref="messageConverterQueue"/>-->
+        <!--<property name="messageListener" ref="converterListener"/>-->
+    <!--</bean>-->
+
+
+    <!-- 用监听适配器 做消息监听器-->
+    <bean class="org.springframework.jms.listener.adapter.MessageListenerAdapter" id="messageListenerAdapter">
+        <property name="delegate">
+            <bean class="com.wk.spring.mq.listener.ConsumerListener"/>
+        </property>
+        <property name="defaultListenerMethod" value="receiveMessage"/>
+        <property name="messageConverter" ref="emailMessageConverter"/>
+    </bean>
+    <!-- 消息监听适配器对应的监听容器 -->
+    <bean class="org.springframework.jms.listener.DefaultMessageListenerContainer" id="messageListenerAdapterContainer">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="destination" ref="messageConverterQueue"/>
+        <!-- 使用MessageListenerAdapter来作为消息监听器 -->
+        <property name="messageListener" ref="messageListenerAdapter"/>
+    </bean>
+
+
+
+</beans>

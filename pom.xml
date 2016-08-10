@@ -12,6 +12,9 @@
 	  <module>activemq-message-adapter-replayto</module>
 	  <module>activemq-message-adapter</module>
 	  <module>activemq-spring-listener</module>
+	  <module>activemq-message-adapter-replayto-m2</module>
+	  <module>activemq-message-converter</module>
+	  <module>activemq-message-transaction</module>
   </modules>
   
   <properties>
